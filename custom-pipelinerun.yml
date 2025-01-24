@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: greet-pipeline-run
+spec:
+  pipelineRef:
+    name: greet-pipeline
+  params:
+    - name: name
+      value: "Openshift"

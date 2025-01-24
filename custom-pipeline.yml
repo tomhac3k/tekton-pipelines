@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata: 
+  name: greet-pipeline
+spec:
+  params:
+    - name: name
+      type: string
+      default: "World"
+  tasks:
+    - name: greet-task
+      taskRef:
+        name: greet
+      params:
+        - name: name
+          value: "$(params.name)"
