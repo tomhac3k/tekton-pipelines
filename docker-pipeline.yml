@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: docker-build
+spec:
+  params:
+    - name: IMAGE_NAME
+      type: string
+      default: xhttpd-tkn
+
+    - name: GIT_URL
+      type: string
+      default: https://github.com/tomhac3k/tekton-pipelines/
+
+    - name: APP_PATH
+      type: string
+      default: practice-buildimage
+  
+  taskRef:
+    name: git-clone
+    kind: ClusterTask
+    params:
+      - name: fetch-url
+        value: $(params.GIT_URL)
+
+      - name: image
+        value: quay.io/tomhac3k/$(params.IMAGE_NAME)
+
+      - name: ContainerFile
+        value: Containerfile
+        
+
+
+
