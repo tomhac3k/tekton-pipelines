@@ -1,7 +1,10 @@
-FROM quay.io/tomhac3k/httpd:DO180
+# Use nginx unprivileged image (already configured for non-root)
+FROM nginxinc/nginx-unprivileged:stable-alpine
 
-USER 1001
+# Copy website files
+COPY ./html /usr/share/nginx/html
 
-WORKDIR /var/www/html/
+# Expose non-privileged port
+EXPOSE 8080
 
-COPY index.html .
+# Container starts nginx automatically
