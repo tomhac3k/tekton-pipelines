@@ -2,7 +2,7 @@
 FROM nginxinc/nginx-unprivileged:stable-alpine
 
 # Copy website files
-COPY ./html /usr/share/nginx/html
+COPY index.html /usr/share/nginx/html
 
 # Expose non-privileged port
 EXPOSE 8080
