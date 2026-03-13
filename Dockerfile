@@ -1,5 +1,5 @@
 # Use nginx unprivileged image (already configured for non-root)
-FROM nginxinc/nginx-unprivileged:stable-alpine
+FROM nginxinc/nginx-unprivileged:alpine3.23-perl
 
 # Copy website files
 COPY index.html /usr/share/nginx/html
