@@ -16,7 +16,7 @@ RUN sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf && \
     chmod -R g=u /var/log/httpd /var/run/httpd
 
 # Optional: Add your content
-# COPY index.html /var/www/html/index.html
+COPY index.html /var/www/html/index.html
 
 # Use a non-root user (OpenShift will override this, but it's best practice)
 USER 1001
