@@ -7,62 +7,59 @@ objects:
   kind: Deployment
   metadata:
     labels:
-      app: ${NAME}
+      app: httpd-${NAME}
       env: ${ENVIRONMENT}
-    name: ${NAME}
-    namespace: devops
+    name: httpd-${NAME}
   spec:
     replicas: 1
     selector:
       matchLabels:
-        app: ${NAME}
+        app: httpd-${NAME}
     template:
       metadata:
         labels:
-          app: ${NAME}
+          app: httpd-${NAME}
           env: ${ENVIRONMENT}
       spec:
         containers:
         - image: ${IMAGE}
           imagePullPolicy: IfNotPresent
-          name: httpd
+          name: httpd-${NAME}
 - apiVersion: v1
   kind: Service
   metadata:
     labels:
-      app: ${NAME}
+      app: httpd-${NAME}
       env: ${ENVIRONMENT}
-    name: ${NAME}
-    namespace: devops
+    name: httpd-${NAME}
   spec:
     ports:
     - port: 8080
       protocol: TCP
       targetPort: 8080
     selector:
-      app: ${NAME}
+      app: httpd-${NAME}
     type: ClusterIP
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     labels:
-      app: ${NAME}
+      app: httpd-${NAME}
       env: ${ENVIRONMENT}
-    name: ${NAME}
-    namespace: devops
-    resourceVersion: "975529"
+    name: httpd-${NAME}
   spec:
-    host: ${NAME}-devops.apps-crc.testing
+    host: httpd-${NAME}-devops.apps-crc.testing
     port:
       targetPort: 8080
     to:
       kind: Service
-      name: ${NAME}
+      name: httpd-${NAME}
 parameters:
   - name: NAME
-    value: myhttpd
+    from: '[a-z]{5}'
+    generate: expression
     description: Deployment name
-    required: true
+    required: false
   - name: IMAGE
     value: quay.io/rh-ee-mtahmeed/httpd:arm
     description: default image name
@@ -70,3 +67,8 @@ parameters:
   - name: ENVIRONMENT
     description: provide meaning to deployment
     required: false
+  - name: LABELS
+    value: tahmeed
+labels:
+  abcd: ${LABELS}
+
