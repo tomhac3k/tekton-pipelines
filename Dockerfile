@@ -11,7 +11,7 @@ RUN microdnf clean all
 
 # OpenShift Requirement: Apache usually listens on 80 (root only). 
 # We must change it to a non-privileged port like 8080.
-RUN sed -i 's/Listen 80/Listen 8080/' /etc/httpd/conf/httpd.conf && \
+RUN sed -i 's/Listen 80/Listen 8081/' /etc/httpd/conf/httpd.conf && \
     chgrp -R 0 /var/log/httpd /var/run/httpd && \
     chmod -R g=u /var/log/httpd /var/run/httpd
 
@@ -22,5 +22,6 @@ COPY index.html /var/www/html/index.html
 USER 1001
 
 EXPOSE 8080
+EXPOSE 8081
 
 CMD ["httpd", "-D", "FOREGROUND"]
