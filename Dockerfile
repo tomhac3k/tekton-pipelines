@@ -6,8 +6,8 @@ FROM registry.access.redhat.com/ubi9/ubi-micro:latest
 # if you need a truly 'micro' build, or just use ubi-minimal for simplicity.
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
-RUN microdnf install -y httpd && \
-    microdnf clean all
+RUN microdnf install -y httpd
+RUN microdnf clean all
 
 # OpenShift Requirement: Apache usually listens on 80 (root only). 
 # We must change it to a non-privileged port like 8080.
