@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: wtops-listener
+spec:
+  serviceAccountName: pipeline
+  triggers:
+    - name: wtops-image-trigger
+      bindings:
+        - ref: wtops-binding
+      template:
+        ref: image-build-and-push-template

@@ -1,0 +1,39 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: git-clone-and-push
+spec:
+  workspaces:
+    - name: shared-workspace
+
+  params:
+    - name: repo-url
+      default: https://github.com/tomhac3k/tekton-pipelines.git
+    - name: image-url
+      default: quay.io/rh-ee-mtahmeed/httpd:pipeline
+
+  tasks:
+
+    - name: clone
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.repo-url)
+
+    - name: build
+      runAfter: [clone]
+      taskRef:
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: $(params.image-url)
+        - name: SKIP_PUSH
+          value: "false"
+
