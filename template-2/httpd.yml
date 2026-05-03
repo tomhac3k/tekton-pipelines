@@ -1,0 +1,76 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: httpd-arm
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: ${NAME}
+      env: ${ENVIRONMENT}
+    name: ${NAME}
+    namespace: devops
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: ${NAME}
+    template:
+      metadata:
+        labels:
+          app: ${NAME}
+          env: ${ENVIRONMENT}
+      spec:
+        containers:
+        - image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          name: httpd
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${NAME}
+      env: ${ENVIRONMENT}
+    name: ${NAME}
+    namespace: devops
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: ${NAME}
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: ${NAME}
+      env: ${ENVIRONMENT}
+    name: ${NAME}
+    namespace: devops
+    resourceVersion: "975529"
+  spec:
+    host: ${NAME}-devops.apps-crc.testing
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: ${NAME}
+parameters:
+  - name: NAME
+    value: myhttpd
+    description: Deployment name
+    required: true
+  - name: IMAGE
+    value: quay.io/rh-ee-mtahmeed/httpd:arm
+    description: default image name
+    required: true
+  - name: ENVIRONMENT
+    description: provide meaning to deployment
+    required: false
+labels:
+  httpdx: template
+  kind: template
+  origin: template
