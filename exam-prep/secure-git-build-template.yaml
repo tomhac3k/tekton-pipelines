@@ -1,0 +1,158 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: ${NAME}
+  template: secure-git-build
+metadata:
+  name: secure-git-build
+  annotations:
+    description: Build an image from a private Git repository using username and token authentication
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${NAME}-git-secret
+    labels:
+      app: ${NAME}
+  type: kubernetes.io/basic-auth
+  stringData:
+    username: ${GIT_USERNAME}
+    password: ${GIT_TOKEN}
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+    annotations:
+      description: Keeps track of changes in the application image
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+    annotations:
+      description: Builds the application image from a private Git repository
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}:latest
+    source:
+      type: Git
+      git:
+        uri: ${SOURCE_REPOSITORY_URL}
+        ref: ${SOURCE_REPOSITORY_REF}
+      contextDir: ${CONTEXT_DIR}
+      sourceSecret:
+        name: ${NAME}-git-secret
+    strategy:
+      type: Docker
+      dockerStrategy:
+        dockerfilePath: ${DOCKERFILE_PATH}
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChange: {}
+    - type: Generic
+      generic:
+        secret: ${GENERIC_WEBHOOK_SECRET}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+    annotations:
+      description: Deploys the built application image
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"${NAME}:latest"},"fieldPath":"spec.template.spec.containers[0].image"}]'
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: ${NAME}
+    template:
+      metadata:
+        labels:
+          app: ${NAME}
+      spec:
+        containers:
+        - name: ${NAME}
+          image: ' '
+          ports:
+          - containerPort: ${{CONTAINER_PORT}}
+            protocol: TCP
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+  spec:
+    ports:
+    - name: http
+      port: ${{CONTAINER_PORT}}
+      targetPort: ${{CONTAINER_PORT}}
+    selector:
+      app: ${NAME}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: ${NAME}
+    labels:
+      app: ${NAME}
+    annotations:
+      template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+  spec:
+    to:
+      kind: Service
+      name: ${NAME}
+    port:
+      targetPort: http
+parameters:
+- name: NAME
+  displayName: Application Name
+  description: Name used for all resources created by this template
+  required: true
+  value: myapp
+- name: SOURCE_REPOSITORY_URL
+  displayName: Git Repository URL
+  description: HTTPS URL of the private Git repository (do not embed credentials in the URL)
+  required: true
+- name: SOURCE_REPOSITORY_REF
+  displayName: Git Reference
+  description: Branch, tag, or commit to build
+  value: main
+- name: GIT_USERNAME
+  displayName: Git Username
+  description: Username for Git authentication (GitLab/GitHub username, or oauth2 for some GitLab setups)
+  required: true
+- name: GIT_TOKEN
+  displayName: Git Token
+  description: Personal access token or password for Git authentication
+  required: true
+- name: CONTEXT_DIR
+  displayName: Context Directory
+  description: Relative path within the repository containing the Dockerfile
+- name: DOCKERFILE_PATH
+  displayName: Dockerfile Path
+  description: Path to the Dockerfile relative to the context directory
+  value: Dockerfile
+- name: CONTAINER_PORT
+  displayName: Container Port
+  description: Port exposed by the application container
+  value: "8080"
+- name: MEMORY_LIMIT
+  displayName: Memory Limit
+  description: Maximum memory the container can use
+  value: 512Mi
+- name: GENERIC_WEBHOOK_SECRET
+  displayName: Generic Webhook Secret
+  description: Secret string for the Generic build webhook trigger
+  generate: expression
+  from: '[a-zA-Z0-9]{40}'
