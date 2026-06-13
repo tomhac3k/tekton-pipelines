@@ -70,11 +70,12 @@ parameters:
   displayName: Application Name
   description: Name used for all resources created by this template
   required: true
-  value: myapp
+  value: node-app
 - name: SOURCE_REPOSITORY_URL
   displayName: Git Repository URL
   description: HTTPS URL of the private Git repository (do not embed credentials in the URL)
   required: true
+  value: https://github.com/tomhac3k/tekton-pipelines.git
 - name: SOURCE_REPOSITORY_REF
   displayName: Git Reference
   description: Branch, tag, or commit to build
@@ -83,6 +84,7 @@ parameters:
   displayName: Git Username
   description: Username for Git authentication (GitLab/GitHub username, or oauth2 for some GitLab setups)
   required: true
+  value: tomhac3k
 - name: GIT_TOKEN
   displayName: Git Token
   description: Personal access token or password for Git authentication
@@ -90,6 +92,7 @@ parameters:
 - name: CONTEXT_DIR
   displayName: Context Directory
   description: Relative path within the repository containing package.json (leave blank if at repo root)
+  value: exam-prep/npm-app
 - name: NODEJS_VERSION
   displayName: Node.js Version
   description: Node.js S2I builder image tag from the openshift namespace
