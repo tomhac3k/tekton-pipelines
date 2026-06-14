@@ -1,0 +1,102 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Secret",
+            "metadata": {
+                "labels": {
+                    "app": "my-npm-app",
+                    "template": "secure-git-npm-build"
+                },
+                "name": "my-npm-app-git-secret"
+            },
+            "stringData": {
+                "password": "N/A",
+                "username": "tomhac3k"
+            },
+            "type": "kubernetes.io/basic-auth"
+        },
+        {
+            "apiVersion": "image.openshift.io/v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "annotations": {
+                    "description": "Keeps track of changes in the npm application image"
+                },
+                "labels": {
+                    "app": "my-npm-app",
+                    "template": "secure-git-npm-build"
+                },
+                "name": "my-npm-app"
+            }
+        },
+        {
+            "apiVersion": "build.openshift.io/v1",
+            "kind": "BuildConfig",
+            "metadata": {
+                "annotations": {
+                    "description": "Builds the npm application image from a private Git repository",
+                    "template.alpha.openshift.io/wait-for-ready": "true"
+                },
+                "labels": {
+                    "app": "my-npm-app",
+                    "template": "secure-git-npm-build"
+                },
+                "name": "my-npm-app"
+            },
+            "spec": {
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "my-npm-app:latest"
+                    }
+                },
+                "source": {
+                    "contextDir": "exam-prep/npm-app",
+                    "git": {
+                        "ref": "main",
+                        "uri": "https://github.com/tomhac3k/tekton-pipelines.git"
+                    },
+                    "sourceSecret": {
+                        "name": "my-npm-app-git-secret"
+                    },
+                    "type": "Git"
+                },
+                "strategy": {
+                    "sourceStrategy": {
+                        "env": [
+                            {
+                                "name": "NPM_CONFIG_PRODUCTION",
+                                "value": "false"
+                            }
+                        ],
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "nodejs:20-ubi9",
+                            "namespace": "openshift"
+                        }
+                    },
+                    "type": "Source"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "imageChange": {},
+                        "type": "ImageChange"
+                    },
+                    {
+                        "generic": {
+                            "secret": "a6dKUi15dE1FVfVYO3pBjj8KNYrSxNAHLl4obgnk"
+                        },
+                        "type": "Generic"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -3,6 +3,8 @@ kind: Template
 labels:
   app: ${NAME}
   template: secure-git-npm-build
+  version: "1.0"
+  owner: tomhac3k
 metadata:
   name: secure-git-npm-build
   annotations:

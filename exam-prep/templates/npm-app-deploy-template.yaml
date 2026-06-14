@@ -3,6 +3,8 @@ kind: Template
 labels:
   app: ${NAME}
   template: npm-app-deploy
+  owner: tomhac3k
+  version: "1.0"
 metadata:
   name: npm-app-deploy
   annotations:
@@ -89,7 +91,7 @@ parameters:
   displayName: Application Name
   description: Must match the NAME used in the secure-git-npm-build template
   required: true
-  value: myapp
+  value: node-app
 - name: IMAGE_TAG
   displayName: Image Tag
   description: ImageStream tag to deploy (output from the build template)
